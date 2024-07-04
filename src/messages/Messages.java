@@ -1,13 +1,15 @@
 package messages;
-import java.io.Serializable;
 
-public class Messages implements Serializable{
+import java.io.Serializable;
+import java.util.Map;
+
+public class Messages implements Serializable {
 
     private String sender;
     private String content;
     private long timestamp;
     private boolean isBroadcast;
-
+    private Map<String, Integer> vectorClock;
 
     public Messages(String sender, String content, long timestamp, boolean isBroadcast) {
         this.sender = sender;
@@ -30,5 +32,17 @@ public class Messages implements Serializable{
 
     public boolean isBroadcast() {
         return isBroadcast;
+    }
+
+    public Map<String, Integer> getVectorClock() {
+        return vectorClock;
+    }
+
+    public void setVectorClock(Map<String, Integer> vectorClock) {
+        this.vectorClock = vectorClock;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }
