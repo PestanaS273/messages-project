@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -18,6 +19,7 @@ public class Node {
     private DatagramSocket socket;
     private ConcurrentHashMap<String, InetAddress> peers;
     private PriorityBlockingQueue<Messages> messageQueue;
+    private HashSet<String> receivedMessages;
 
     private byte[] serializeMessage(Messages message) throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -39,6 +41,7 @@ public class Node {
         this.socket = new DatagramSocket(port);
         this.peers = new ConcurrentHashMap<>();
         this.messageQueue = new PriorityBlockingQueue<>(10, (m1, m2) -> Long.compare(m1.getTimestamp(), m2.getTimestamp()));
+        this.receivedMessages = new HashSet<>();
     }
 
     public void addPeer(String nodeName, InetAddress address) {
@@ -49,6 +52,8 @@ public class Node {
         InetAddress address = peers.get(recipientNode);
         if (address != null) {
             byte[] buffer = serializeMessage(message);
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, port);
+            socket.send(packet);
         }
     }
 
@@ -75,8 +80,12 @@ public class Node {
             messageQueue.add(message);
             while (!messageQueue.isEmpty()) {
                 Messages msg = messageQueue.poll();
-                System.out.println(msg.getSender() + ": " + msg.getContent());
+                System.out.println( nodeName + " received broadcast: " + msg.getSender() + ": " + msg.getContent());
             }
+        } else {
+            System.out.println(nodeName + " received directly: " + message.getSender() + ": " + message.getContent());
         }
     }
+
+
 }
